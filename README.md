@@ -1,1 +1,1 @@
-# CoinSprout-mobile-dev
+# CoinSprout is an automated micro-investing mobile application designed to lower the barrier of entry to wealth creation. By automatically rounding up everyday expenses to the nearest KES 10, 50, or 100, and allowing frictionless direct manual top-ups, CoinSprout turns small, unnoticed friction points into a disciplined investment habit. Accumulated micro-funds are automatically distributed into personalized, regulated local financial asset classes like Money Market Funds (MMFs) and Treasury Bills.
