@@ -11,24 +11,31 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.coinsprout.app.data.RiskData
 import com.coinsprout.app.state.AppState
 import com.coinsprout.app.ui.components.AllocationDonut
 import com.coinsprout.app.ui.theme.*
+import com.coinsprout.app.viewmodel.CoinSproutViewModel
 import kotlin.math.roundToInt
 
 private data class Legend(val label: String, val value: Int, val color: Color)
 
 @Composable
-fun PortfolioScreen(navController: NavHostController, appState: AppState) {
-    val category = appState.riskCategory
+fun PortfolioScreen(
+    navController: NavHostController,
+    appState: AppState,
+    viewModel: CoinSproutViewModel = viewModel()
+) {
+    val category by viewModel.riskCategory.collectAsState()
+    val principal by viewModel.portfolioBalance.collectAsState()
     val allocation = RiskData.allocations.getValue(category)
-    val growth = RiskData.growth.getValue(category) // [6mo, 1yr, 5yr]
+    val growth = RiskData.growth.getValue(category)
 
     var periodIndex by remember { mutableStateOf(1) }
     val periodLabels = listOf("6 months", "1 year", "5 years")
-    val projected = (appState.principal * growth[periodIndex]).roundToInt()
+    val projected = (principal * growth[periodIndex]).roundToInt()
 
     Column(
         modifier = Modifier
@@ -89,7 +96,7 @@ fun PortfolioScreen(navController: NavHostController, appState: AppState) {
                     style = MaterialTheme.typography.headlineSmall,
                     color = Forest
                 )
-                Text("projected value", color = InkSoft, style = MaterialTheme.typography.bodySmall)
+                Text("projected value based on KES ${principal.toInt()} principal", color = InkSoft, style = MaterialTheme.typography.bodySmall)
                 Slider(
                     value = periodIndex.toFloat(),
                     onValueChange = { periodIndex = it.roundToInt() },

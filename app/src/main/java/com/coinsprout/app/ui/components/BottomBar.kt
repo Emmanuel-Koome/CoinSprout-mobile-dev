@@ -9,9 +9,11 @@ import androidx.navigation.NavHostController
 data class BottomTab(val route: String, val label: String, val emoji: String)
 
 val bottomTabs = listOf(
-    BottomTab("dashboard", "Home", "\u2302"),
-    BottomTab("portfolio", "Portfolio", "\u25C9"),
-    BottomTab("goals", "Goals", "\uD83C\uDFAF")
+    BottomTab("dashboard", "Home", "🏠"),
+    BottomTab("portfolio", "Portfolio", "📊"),
+    BottomTab("transactions", "Activity", "📝"),
+    BottomTab("goals", "Goals", "🎯"),
+    BottomTab("settings", "Settings", "⚙️")
 )
 
 @Composable
@@ -23,7 +25,9 @@ fun CoinSproutBottomBar(navController: NavHostController, currentRoute: String?)
                 onClick = {
                     if (currentRoute != tab.route) {
                         navController.navigate(tab.route) {
+                            popUpTo("dashboard") { saveState = true }
                             launchSingleTop = true
+                            restoreState = true
                         }
                     }
                 },

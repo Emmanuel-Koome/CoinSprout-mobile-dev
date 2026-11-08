@@ -2,10 +2,11 @@ package com.coinsprout.app.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -14,10 +15,14 @@ import com.coinsprout.app.ui.theme.*
 
 @Composable
 fun SignUpScreen(navController: NavHostController) {
+    var smsGranted by remember { mutableStateOf(true) }
+    var notifGranted by remember { mutableStateOf(true) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp)
+            .verticalScroll(rememberScrollState())
     ) {
         Text("STEP 1 OF 2", style = MaterialTheme.typography.bodySmall, color = Sprout)
         Spacer(Modifier.height(4.dp))
@@ -52,17 +57,19 @@ fun SignUpScreen(navController: NavHostController) {
         }
         Spacer(Modifier.height(16.dp))
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Moss, RoundedCornerShape(16.dp))
-                .padding(14.dp)
-        ) {
-            Text(
-                "This pilot uses a simulated funding source \u2014 no real M-Pesa or bank credentials are stored.",
-                color = Forest,
-                style = MaterialTheme.typography.bodySmall
-            )
+        Card(colors = CardDefaults.cardColors(containerColor = Moss)) {
+            Column(Modifier.padding(14.dp)) {
+                Text("AUTOMATED SAVINGS PERMISSIONS", style = MaterialTheme.typography.bodySmall, color = Forest, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(8.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("SMS Round-Up Reader", style = MaterialTheme.typography.bodySmall, color = Forest)
+                    Switch(checked = smsGranted, onCheckedChange = { smsGranted = it })
+                }
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Push Notifications", style = MaterialTheme.typography.bodySmall, color = Forest)
+                    Switch(checked = notifGranted, onCheckedChange = { notifGranted = it })
+                }
+            }
         }
         Spacer(Modifier.height(20.dp))
 
@@ -71,7 +78,7 @@ fun SignUpScreen(navController: NavHostController) {
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Forest, contentColor = Paper)
         ) {
-            Text("Verify & continue", fontWeight = FontWeight.Bold)
+            Text("Verify & Continue", fontWeight = FontWeight.Bold)
         }
     }
 }

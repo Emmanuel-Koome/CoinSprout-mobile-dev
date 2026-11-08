@@ -2,31 +2,38 @@ package com.coinsprout.app.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.coinsprout.app.state.AppState
 import com.coinsprout.app.ui.theme.Forest
 import com.coinsprout.app.ui.theme.Moss
 import com.coinsprout.app.ui.theme.Paper
+import com.coinsprout.app.viewmodel.CoinSproutViewModel
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DepositScreen(navController: NavHostController, appState: AppState) {
+fun DepositScreen(
+    navController: NavHostController,
+    appState: AppState,
+    viewModel: CoinSproutViewModel = viewModel()
+) {
+    val riskCategory by viewModel.riskCategory.collectAsState()
     var amountText by remember { mutableStateOf("") }
     var isSuccess by remember { mutableStateOf(false) }
     val amount = amountText.toIntOrNull() ?: 0
 
     LaunchedEffect(isSuccess) {
         if (isSuccess) {
-            delay(2000)
+            delay(1500)
             navController.popBackStack()
         }
     }
@@ -52,7 +59,7 @@ fun DepositScreen(navController: NavHostController, appState: AppState) {
         ) {
             if (!isSuccess) {
                 Text(
-                    "Enter amount to deposit into your $${appState.riskCategory} portfolio",
+                    "Enter amount to deposit into your $riskCategory Grower portfolio",
                     style = MaterialTheme.typography.bodyLarge,
                     color = Forest
                 )
@@ -73,6 +80,7 @@ fun DepositScreen(navController: NavHostController, appState: AppState) {
                 Button(
                     onClick = {
                         if (amount > 0) {
+                            viewModel.deposit(amount.toDouble())
                             appState.deposit(amount)
                             isSuccess = true
                         }
@@ -92,7 +100,7 @@ fun DepositScreen(navController: NavHostController, appState: AppState) {
                     Box(
                         modifier = Modifier
                             .size(80.dp)
-                            .background(Moss, shape = androidx.compose.foundation.shape.CircleShape),
+                            .background(Moss, shape = CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Text("✓", style = MaterialTheme.typography.headlineLarge, color = Forest)
