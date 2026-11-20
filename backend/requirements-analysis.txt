@@ -1,0 +1,5 @@
+# Only needed for analysis/ and backtest/ (not for running the API)
+numpy>=1.26
+pandas>=2.1
+scipy>=1.11
+statsmodels>=0.14

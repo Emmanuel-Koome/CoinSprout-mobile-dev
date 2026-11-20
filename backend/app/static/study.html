@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student investment study</title>
+<style>
+  :root { --forest:#1f3a2e; --ink:#1b2420; --soft:#4c5a52; --cream:#efe8d8; --paper:#fbf8f1; --line:#b9b09a; --green:#2b6e4a; --err:#8a2a18; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:17px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color:var(--ink); background:var(--cream); }
+  main { max-width: 640px; margin: 0 auto; padding: 20px 16px 64px; }
+  h1 { font-size: 1.5rem; color: var(--forest); margin: 8px 0 4px; }
+  h2 { font-size: 1.15rem; color: var(--forest); margin: 24px 0 6px; }
+  p, li { color: var(--ink); } .soft { color: var(--soft); font-size: .92rem; }
+  fieldset { border: 1px solid var(--line); border-radius: 12px; background: var(--paper); margin: 0 0 14px; padding: 12px 14px; }
+  legend { padding: 0 6px; font-weight: 600; }
+  label.opt { display:flex; align-items:center; gap:10px; min-height:48px; padding: 4px 2px; }
+  input[type=radio], input[type=checkbox] { width: 22px; height: 22px; accent-color: var(--green); flex: none; }
+  select, input[type=text] { width:100%; min-height:48px; font:inherit; padding: 8px 10px; border:1px solid var(--line); border-radius:10px; background:#fff; }
+  .likert { display:flex; gap:4px; } .likert label { flex:1; text-align:center; min-height:48px; border:1px solid var(--line); border-radius:10px; background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:.95rem; }
+  .likert input { margin: 2px 0 0; } .ends { display:flex; justify-content:space-between; font-size:.8rem; color:var(--soft); margin-top:4px; }
+  button { min-height:48px; padding: 0 22px; font:inherit; font-weight:700; border-radius:12px; border:0; background:var(--forest); color:var(--paper); cursor:pointer; }
+  button.secondary { background: transparent; color: var(--forest); border:2px solid var(--forest); }
+  button:disabled { opacity:.5; } button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; }
+  .err { color: var(--err); font-weight: 600; margin: 8px 0; } .card { background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:16px; margin: 12px 0; }
+  .row { display:flex; align-items:center; gap:10px; margin: 6px 0; } .bar { height: 14px; border-radius: 7px; background: var(--green); } .track { flex:1; background:#dcd3be; border-radius:7px; }
+  .ai { background:#e3efe6; border-radius:10px; padding:8px 12px; font-weight:600; color:var(--forest); }
+  .progress { height: 6px; background:#dcd3be; border-radius:3px; margin: 8px 0 16px; } .progress div { height:100%; background: var(--green); border-radius:3px; }
+</style>
+</head>
+<body>
+<main id="app" aria-live="polite"></main>
+<script>
+"use strict";
+const API = "/api/v1/study";
+const app = document.getElementById("app");
+const state = { inst: null, pid: sessionStorage.getItem("pid"), step: sessionStorage.getItem("step") || "intro" };
+const STEPS = ["intro", "baseline", "stimulus", "outcomes", "done"];
+
+function h(tag, attrs, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") n.className = v; else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else if (v !== false && v != null) n.setAttribute(k, v === true ? "" : v);
+  }
+  for (const kid of kids.flat()) if (kid != null) n.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+  return n;
+}
+async function api(path, method = "GET", body) {
+  const r = await fetch(API + path, { method, headers: body ? { "content-type": "application/json" } : {}, body: body ? JSON.stringify(body) : undefined });
+  if (r.status === 204) return {};
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(typeof data.detail === "string" ? data.detail : (data.detail && data.detail[0] && data.detail[0].msg) || "Something went wrong");
+  return data;
+}
+function go(step) { state.step = step; sessionStorage.setItem("step", step); render(); window.scrollTo(0, 0); }
+function shell(title, ...content) {
+  const pct = Math.max(5, (STEPS.indexOf(state.step) / (STEPS.length - 1)) * 100);
+  return [h("h1", {}, title), h("div", { class: "progress", role: "progressbar", "aria-valuenow": Math.round(pct), "aria-valuemin": 0, "aria-valuemax": 100 }, h("div", { style: `width:${pct}%` })), ...content];
+}
+function mount(nodes) { app.replaceChildren(...nodes); }
+function err(msg) { const e = document.getElementById("err"); if (e) e.textContent = msg || ""; }
+
+/* ---------- reusable controls ---------- */
+function likert(name, text) {
+  const L = state.inst.likertPoints, labels = state.inst.likertLabels;
+  const opts = []; for (let v = 1; v <= L; v++) opts.push(h("label", {}, h("span", {}, String(v)), h("input", { type: "radio", name, value: String(v), required: true, "aria-label": `${v}: ${labels[v]}` })));
+  return h("fieldset", {}, h("legend", {}, text), h("div", { class: "likert" }, opts), h("div", { class: "ends" }, h("span", {}, labels[1]), h("span", {}, labels[L])));
+}
+function choice(name, text, options) {
+  return h("fieldset", {}, h("legend", {}, text), options.map(([v, label]) => h("label", { class: "opt" }, h("input", { type: "radio", name, value: v, required: true }), label)));
+}
+const val = (form, name) => { const c = form.querySelector(`input[name="${name}"]:checked`); return c ? c.value : null; };
+const nums = (form, ids) => ids.map(id => Number(val(form, id)));
+
+/* ---------- screens ---------- */
+function intro() {
+  const f = h("form", { novalidate: true });
+  f.append(
+    h("div", { class: "card" }, h("h2", {}, "Information sheet"),
+      h("p", {}, "We are Strathmore University students studying how people respond to investment recommendations from a digital tool. You will answer some questions, look at an example recommendation, and then rate it. It takes about 10 minutes."),
+      h("p", {}, "No real money is involved and nothing here is financial advice. We do not ask for your name, phone number, M-Pesa details or transactions. Your answers are stored under a random code and used only for this study. Taking part is voluntary and you can stop at any time, and you can delete your answers using the button on the last page."),
+      h("p", { class: "soft" }, "[DRAFT - replace with the information sheet approved by your ethics committee, with supervisor and contact details.]")),
+    h("fieldset", {}, h("legend", {}, "Please confirm"),
+      h("label", { class: "opt" }, h("input", { type: "checkbox", id: "c_consent" }), "I have read the information above and agree to take part."),
+      h("label", { class: "opt" }, h("input", { type: "checkbox", id: "c_age" }), "I am at least 18 years old."),
+      h("label", { class: "opt" }, h("input", { type: "checkbox", id: "c_enrolled" }), "I am currently an undergraduate student at Strathmore University."),
+      h("label", { class: "opt" }, h("input", { type: "checkbox", id: "c_mm" }), "I have used mobile money (for example M-Pesa) in the last 30 days.")),
+    h("label", { for: "year" }, "Year of study"),
+    h("select", { id: "year" }, [1, 2, 3, 4, 5].map(y => h("option", { value: y }, `Year ${y}`))),
+    state.inst.accessCodeRequired ? [h("label", { for: "code" }, "Access code"), h("input", { type: "text", id: "code", autocomplete: "off" })] : null,
+    h("p", { id: "err", class: "err", role: "alert" }),
+    h("button", { type: "submit" }, "Continue"));
+  f.addEventListener("submit", async (e) => {
+    e.preventDefault(); err("");
+    try {
+      const r = await api("/screen", "POST", { consent: f.querySelector("#c_consent").checked, age18OrOver: f.querySelector("#c_age").checked,
+        enrolledStrathmoreUndergraduate: f.querySelector("#c_enrolled").checked, usedMobileMoneyLast30Days: f.querySelector("#c_mm").checked,
+        yearOfStudy: Number(f.querySelector("#year").value), accessCode: state.inst.accessCodeRequired ? f.querySelector("#code").value : null });
+      if (!r.eligible) { err(r.message); return; }
+      state.pid = r.participantId; sessionStorage.setItem("pid", state.pid); go("baseline");
+    } catch (x) { err(x.message); }
+  });
+  mount(shell("Student investment study", f));
+}
+
+function baseline() {
+  const I = state.inst, f = h("form", {});
+  const S = I.scales;
+  f.append(
+    h("h2", {}, "About you"),
+    choice("mmf", "How often do you use mobile money?", [["daily", "Every day"], ["weekly", "Most weeks"], ["monthly", "Once or twice a month"], ["rarely", "Rarely"]]),
+    h("fieldset", {}, h("legend", {}, "Which of these do you use or have used? (select all that apply)"),
+      I.instruments.map(x => h("label", { class: "opt" }, h("input", { type: "checkbox", name: "inst", value: x.id }), x.label))),
+    choice("prev", "Have you ever invested money (for example in shares, a money market fund or treasury bills)?", [["yes", "Yes"], ["no", "No"]]),
+    S.fintech.map(i => likert(i.id, i.text)),
+    h("h2", {}, "Money questions"), h("p", { class: "soft" }, "Just do your best. \"I don't know\" is a fine answer."),
+    I.literacy.map(q => choice(q.id, q.text, q.options)),
+    h("h2", {}, "Your views on computer advice"), S.algo_trust.map(i => likert(i.id, i.text)),
+    h("h2", {}, "Your savings plans"),
+    choice("goal", "What would you most likely save for?", Object.entries(I.goals)),
+    choice("horizon", "When might you need this money?", Object.entries(I.horizons)),
+    choice("tol", "Which sounds most like you?", Object.entries(I.tolerances).map(([k, v]) => [k, v.charAt(0).toUpperCase() + v.slice(1)])),
+    choice("inc", "How steady is your income or allowance?", Object.entries(I.incomeStability)),
+    h("p", { id: "err", class: "err", role: "alert" }), h("button", { type: "submit" }, "Continue"));
+  f.addEventListener("submit", async (e) => {
+    e.preventDefault(); err("");
+    try {
+      await api(`/${state.pid}/baseline`, "POST", {
+        mobileMoneyFrequency: val(f, "mmf"), fintechExperience: nums(f, S.fintech.map(i => i.id)),
+        instrumentsUsed: [...f.querySelectorAll('input[name="inst"]:checked')].map(c => c.value), previousInvestment: val(f, "prev") === "yes",
+        literacy: I.literacy.map(q => val(f, q.id)), algoTrust: nums(f, S.algo_trust.map(i => i.id)), goal: val(f, "goal"),
+        timeHorizon: Number(val(f, "horizon")), riskPreference: Number(val(f, "tol")), incomeStability: Number(val(f, "inc")) });
+      go("stimulus");
+    } catch (x) { err(x.message); }
+  });
+  mount(shell("Part 1: About you", f));
+}
+
+async function stimulus() {
+  mount(shell("Your example recommendation", h("p", {}, "Loading...")));
+  try {
+    const { stimulus: s } = await api(`/${state.pid}/assign`, "POST");
+    const rows = [["Money market fund", "mmf"], ["Treasury bills", "tbill"], ["Unit trust (shares)", "unit"], ["Cash buffer", "cash"]];
+    const card = h("div", { class: "card", role: "group", "aria-label": "Recommendation" },
+      h("h2", { style: "margin-top:0" }, s.headline),
+      rows.map(([label, k]) => h("div", { class: "row" }, h("span", { style: "width:9.5em" }, label), h("div", { class: "track" }, h("div", { class: "bar", style: `width:${s.allocation[k]}%` })), h("strong", {}, `${s.allocation[k]}%`))),
+      h("p", {}, s.whyText),
+      s.aiLabelText ? h("p", { class: "ai" }, s.aiLabelText) : null,
+      h("p", { class: "soft" }, s.disclaimer));
+    mount(shell("Your example recommendation", h("p", {}, "Please read this carefully. Then answer a few questions about it."), card, h("button", { onclick: () => go("outcomes") }, "I have read it")));
+  } catch (x) { mount(shell("Something went wrong", h("p", { class: "err" }, x.message))); }
+}
+
+function outcomes() {
+  const I = state.inst, S = I.scales, f = h("form", {});
+  f.append(
+    h("p", { class: "soft" }, "Think about the recommendation you just saw. You can scroll back up in your browser if you need to, but please answer from your own view."),
+    h("h2", {}, "About the recommendation"), S.trust.map(i => likert(i.id, i.text)),
+    h("h2", {}, "If a tool like this were available"), S.adoption.map(i => likert(i.id, i.text)),
+    h("h2", {}, "How well it suits you"), S.fit.map(i => likert(i.id, i.text)),
+    S.perceived_personalisation.map(i => likert(i.id, i.text)),
+    likert(I.attention.id, I.attention.text),
+    choice("ai", "Did the recommendation say that artificial intelligence (AI) was involved?", [["yes", "Yes"], ["no", "No"], ["unsure", "Not sure"]]),
+    h("p", { id: "err", class: "err", role: "alert" }), h("button", { type: "submit" }, "Submit"));
+  f.addEventListener("submit", async (e) => {
+    e.preventDefault(); err("");
+    try {
+      await api(`/${state.pid}/outcomes`, "POST", { trust: nums(f, S.trust.map(i => i.id)), adoption: nums(f, S.adoption.map(i => i.id)), fit: nums(f, S.fit.map(i => i.id)),
+        perceivedPersonalisation: nums(f, S.perceived_personalisation.map(i => i.id)), manipulationAiNoticed: val(f, "ai"), attentionResponse: Number(val(f, I.attention.id)) });
+      go("done");
+    } catch (x) { err(x.message); }
+  });
+  mount(shell("Part 2: Your view", f));
+}
+
+async function done() {
+  let text = "Thank you."; try { text = (await api("/debrief")).text; } catch (_) {}
+  const del = h("button", { class: "secondary", onclick: async () => {
+    if (!confirm("Delete all of your answers? This cannot be undone.")) return;
+    try { await api(`/${state.pid}`, "DELETE"); sessionStorage.clear(); mount(shell("Your answers were deleted", h("p", {}, "Nothing from your session is stored any more."))); } catch (x) { alert(x.message); }
+  } }, "Withdraw and delete my answers");
+  mount(shell("Thank you", h("div", { class: "card" }, h("p", {}, text)), del));
+}
+
+async function render() {
+  if (!state.inst) { try { state.inst = await api("/instrument"); } catch (x) { mount([h("p", { class: "err" }, "Could not load the study: " + x.message)]); return; } }
+  if (state.step !== "intro" && !state.pid) state.step = "intro";
+  ({ intro, baseline, stimulus, outcomes, done })[state.step]();
+}
+render();
+</script>
+</body>
+</html>
