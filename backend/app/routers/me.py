@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 from ..db import get_db
 from ..models import (Goal, LedgerEntry, Notification, RefreshToken, StkRequest, Transaction, User, UserSettings)
 from ..schemas import MeOut, Recommendation, RiskProfileIn, SettingsIn, SettingsOut
+from ..ml import engine
 from ..security import current_user
-from ..services import risk_model
 from ..services.recommendation import presented_recommendation
 from ..services.roundup import VALID_INCREMENTS_CENTS, VALID_THRESHOLDS_CENTS
 from ..util import mask_phone
@@ -48,11 +48,12 @@ def put_settings(body: SettingsIn, user: User = Depends(current_user), db: Sessi
 @router.put("/risk-profile", response_model=Recommendation)
 def put_risk_profile(body: RiskProfileIn, user: User = Depends(current_user), db: Session = Depends(get_db)):
     """Stores the quiz answers and the model output, and returns the recommendation shown to the user."""
-    rec = risk_model.recommend(body.risk_horizon, body.risk_tolerance, body.income_stability, body.current_savings_cents)
-    user.risk_horizon, user.risk_tolerance, user.income_stability = body.risk_horizon, body.risk_tolerance, body.income_stability
+    rec = engine.recommend(body.time_horizon, body.risk_tolerance, body.income_stability, body.investment_experience)
+    user.time_horizon, user.risk_tolerance = body.time_horizon, body.risk_tolerance
+    user.income_stability, user.investment_experience = body.income_stability, body.investment_experience
     user.risk_category, user.model_confidence, user.model_reasoning = rec.category, rec.confidence, rec.reasoning
-    user.alloc_mmf, user.alloc_tbill = rec.allocation["mmf"], rec.allocation["tbill"]
-    user.alloc_unit, user.alloc_cash = rec.allocation["unit"], rec.allocation["cash"]
+    user.model_version = rec.model_version
+    user.alloc_mmf, user.alloc_equity = rec.allocation["mmf"], rec.allocation["equity"]
     db.commit()
     return presented_recommendation(db, user)
 

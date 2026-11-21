@@ -41,25 +41,27 @@ class TokenPair(ApiModel):
 
 # ---- profile / settings
 class Allocation(ApiModel):
-    mmf: int
-    tbill: int
-    unit: int
-    cash: int
+    """Percent split across the two assets the AI engine models. Always sums to 100."""
+    mmf: int      # money market fund
+    equity: int   # NSE equities
 
 class RiskProfileIn(ApiModel):
-    risk_horizon: int = Field(ge=1, le=3)
-    risk_tolerance: int = Field(ge=1, le=3)
-    income_stability: int = Field(ge=1, le=3)
-    current_savings_cents: int = Field(default=0, ge=0)
+    """The 4-question risk quiz. Every answer is 1 (lowest) .. 5 (highest)."""
+    time_horizon: int = Field(ge=1, le=5)
+    risk_tolerance: int = Field(ge=1, le=5)
+    income_stability: int = Field(ge=1, le=5)
+    investment_experience: int = Field(ge=1, le=5)
 
 class AllocationResponse(ApiModel):
     recommended_category: str
     allocation: Allocation
     confidence_score: float
+    category_probabilities: dict[str, float]
     ai_reasoning: str
-    expected_annual_yield_pct: float
-    risk_index: float
+    expected_annual_return_pct: float      # historical estimate from ml/train.py, not a promise
+    expected_annual_volatility_pct: float
     model_version: str
+    disclaimer: str
 
 class SettingsOut(ApiModel):
     round_up_increment_cents: int

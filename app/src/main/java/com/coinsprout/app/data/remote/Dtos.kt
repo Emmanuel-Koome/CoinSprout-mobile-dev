@@ -8,8 +8,9 @@ data class OtpVerifyBody(val phone: String, val otp: String)
 data class RefreshBody(val refreshToken: String)
 data class TokenPairDto(val accessToken: String, val refreshToken: String, val expiresInSeconds: Int, val isNewUser: Boolean)
 
-data class AllocationDto(val mmf: Int, val tbill: Int, val unit: Int, val cash: Int)
-data class RiskProfileBody(val riskHorizon: Int, val riskTolerance: Int, val incomeStability: Int, val currentSavingsCents: Long)
+data class AllocationDto(val mmf: Int, val equity: Int)
+/** The 4-question risk quiz; every answer is 1 (lowest) .. 5 (highest). */
+data class RiskProfileBody(val timeHorizon: Int, val riskTolerance: Int, val incomeStability: Int, val investmentExperience: Int)
 data class RecommendationDto(
     val category: String, val allocation: AllocationDto, val personalized: Boolean, val aiLabel: Boolean,
     val reasoning: String?, val confidenceScore: Double, val expectedAnnualYieldPct: Double

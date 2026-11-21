@@ -16,3 +16,11 @@ backend/*.db-shm
 __pycache__/
 .pytest_cache/
 .venv/
+
+# ML training
+ml/output/
+ml/data/cache/
+.ipynb_checkpoints/
+# IDE module files
+.idea/*.iml
+.idea/modules.xml

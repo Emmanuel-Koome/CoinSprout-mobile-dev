@@ -1,0 +1,6 @@
+# Only needed to TRAIN the AI engine (ml/train.py). The API itself does not import any of these.
+numpy>=1.26
+pandas>=2.1
+scipy>=1.11
+scikit-learn>=1.4
+datasets>=2.18

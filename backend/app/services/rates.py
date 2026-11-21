@@ -12,9 +12,7 @@ from ..models import MarketRate
 SEED = [
     MarketRate(id="mmf", key="mmf", asset_class="Money Market Fund", annual_yield_rate=11.85,
                effective_date=date(2026, 3, 1), provider_name="Illustrative seed data", risk_score=1, illustrative=True),
-    MarketRate(id="tbill-91", key="tbill", asset_class="Treasury Bills (91-day)", annual_yield_rate=15.42,
-               effective_date=date(2026, 3, 1), provider_name="Illustrative seed data", risk_score=1, illustrative=True),
-    MarketRate(id="unit-trust", key="unit", asset_class="Equity Unit Trust", annual_yield_rate=12.10,
+    MarketRate(id="nse-equity", key="equity", asset_class="NSE Equities (All Share Index)", annual_yield_rate=12.10,
                effective_date=date(2026, 3, 1), provider_name="Illustrative seed data", risk_score=3, illustrative=True),
 ]
 

@@ -35,7 +35,7 @@ def read_all(user: User = Depends(current_user), db: Session = Depends(get_db)):
 def update_rate(key: str, body: RateUpdate, db: Session = Depends(get_db)):
     rate = db.scalar(select(MarketRate).where(MarketRate.key == key))
     if rate is None:
-        raise HTTPException(404, "Unknown asset key (mmf | tbill | unit)")
+        raise HTTPException(404, "Unknown asset key (mmf | equity)")
     rate.annual_yield_rate, rate.effective_date, rate.illustrative = body.annual_yield_rate, body.effective_date, body.illustrative
     if body.provider_name:
         rate.provider_name = body.provider_name

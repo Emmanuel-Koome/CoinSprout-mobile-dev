@@ -18,16 +18,23 @@ import com.coinsprout.app.viewmodel.Load
 
 private data class Question(val title: String, val options: List<String>)
 
+// Order and 1..5 scale must match the backend (RiskProfileIn) and the AI engine's features (ml/train.py):
+// time_horizon, risk_tolerance, income_stability, investment_experience. Option i is sent as i + 1.
 private val questions = listOf(
-    Question("When might you need this money?", listOf("Within a year", "In 1 to 3 years", "In 3+ years")),
-    Question("If your savings dropped 10% in a month, you would…", listOf("Withdraw everything", "Wait and watch", "Add more while it's cheap")),
-    Question("How steady is your income?", listOf("Irregular", "Mostly steady", "Very steady"))
+    Question("When might you need this money?",
+        listOf("Within a year", "In 1 to 2 years", "In 2 to 5 years", "In 5 to 10 years", "Not for 10+ years")),
+    Question("If your investment dropped 20% in a month, you would…",
+        listOf("Withdraw everything", "Withdraw some of it", "Wait and watch", "Stay calm and hold", "Add more while it's cheap")),
+    Question("How steady is your income or allowance?",
+        listOf("Very irregular", "Often irregular", "Somewhat steady", "Mostly steady", "Very steady")),
+    Question("How much have you invested before?",
+        listOf("Never", "Only savings or a SACCO", "A money market fund", "Unit trusts or bonds", "I have bought shares (NSE)"))
 )
 
 @Composable
 fun RiskQuizScreen(navController: NavHostController, vm: CoinSproutViewModel) {
     // 0 = unanswered. Nothing is pre-selected, so the answers (and any research data) are not anchored on a default.
-    var answers by rememberSaveable { mutableStateOf(listOf(0, 0, 0)) }
+    var answers by rememberSaveable { mutableStateOf(List(questions.size) { 0 }) }
     val quiz by vm.quiz.collectAsStateWithLifecycle()
 
     LaunchedEffect(quiz) {
@@ -38,7 +45,7 @@ fun RiskQuizScreen(navController: NavHostController, vm: CoinSproutViewModel) {
     }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp)) {
-        ScreenTitle("QUICK QUIZ", "Let's find your pace", "Three questions. There are no wrong answers.")
+        ScreenTitle("QUICK QUIZ", "Let's find your pace", "Four questions. There are no wrong answers.")
         Spacer(Modifier.height(16.dp))
         questions.forEachIndexed { qi, q ->
             Text(q.title, style = MaterialTheme.typography.titleMedium, color = Ink)
@@ -52,8 +59,9 @@ fun RiskQuizScreen(navController: NavHostController, vm: CoinSproutViewModel) {
             }
             Spacer(Modifier.height(20.dp))
         }
-        (quiz as? Load.Failed)?.let { ErrorBanner(it.message, onRetry = { vm.submitQuiz(answers[0], answers[1], answers[2]) }); Spacer(Modifier.height(12.dp)) }
-        PrimaryButton("See my result", onClick = { vm.submitQuiz(answers[0], answers[1], answers[2]) },
+        val submit = { vm.submitQuiz(answers[0], answers[1], answers[2], answers[3]) }
+        (quiz as? Load.Failed)?.let { ErrorBanner(it.message, onRetry = submit); Spacer(Modifier.height(12.dp)) }
+        PrimaryButton("See my result", onClick = submit,
             enabled = answers.all { it > 0 }, loading = quiz is Load.Loading)
     }
 }

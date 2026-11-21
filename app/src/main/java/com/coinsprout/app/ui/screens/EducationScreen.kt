@@ -14,9 +14,9 @@ import com.coinsprout.app.ui.theme.*
 private val lessons = listOf(
     "How round-ups work" to "Each time you pay with M-Pesa, we round the purchase up to your chosen step (say KES 10). The difference waits as a round-up. When enough has built up, you approve one M-Pesa prompt and it is invested. If you make about 3 purchases a day and round up KES 7 on average, that is roughly KES 7,600 a year before any returns.",
     "Money Market Funds" to "A pooled fund that lends short-term to banks and the government. Money is usually available within a few days. Yields change over time and are not guaranteed, but the value rarely swings much.",
-    "Treasury Bills" to "Short-term loans to the government. The rate is fixed at the time you buy and paid when the bill matures, so your return is known if you hold to the end.",
-    "Equity Unit Trusts" to "Your money is pooled to buy shares in companies. Over many years shares have tended to grow faster than savings accounts, but the value can fall sharply, even by a fifth or more in a bad year. Only use money you will not need soon.",
-    "Why a cash buffer?" to "A small slice stays in cash so a surprise expense does not force you to sell investments at a bad moment.",
+    "NSE Equities" to "Shares in companies listed on the Nairobi Securities Exchange. Over long periods shares can grow faster than savings, but the value can fall sharply, even by a fifth or more in a bad year. Only use money you will not need soon.",
+    "Why only two?" to "Treasury bills need at least KES 100,000 and move closely with money market funds, so for spare change CoinSprout splits between a money market fund (safe, easy to withdraw) and NSE equities (growth, but bumpy).",
+    "How the AI decides" to "A model trained on questionnaire answers places you in a profile. The split is then worked out from how money market funds and the NSE All Share Index have actually behaved, within limits set for each profile. If you need the money within a year, equities are capped.",
     "About projections" to "Any projection is a set of assumptions, not a promise. That is why CoinSprout shows a bad case, an expected case and a good case instead of one number."
 )
 

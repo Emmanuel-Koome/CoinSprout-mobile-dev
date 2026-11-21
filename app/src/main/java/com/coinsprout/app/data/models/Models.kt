@@ -40,7 +40,8 @@ data class UserSettingsModel(
     val autoStkEnabled: Boolean = false       // opt-in: a payment prompt should never surprise the user
 )
 
-data class Allocation(val mmf: Int, val tbill: Int, val unit: Int, val cash: Int)
+/** Percent split from the AI engine: money market fund and NSE equities. Always sums to 100. */
+data class Allocation(val mmf: Int, val equity: Int)
 
 data class RecommendationModel(
     val category: String,

@@ -28,13 +28,16 @@ def test_irregular_income_keeps_bigger_cash_buffer():
     assert rm.recommend(3, 3, 1, 9_000_000).allocation["cash"] >= 10
 
 
-def test_forecast_range_is_ordered_and_includes_a_loss_case():
-    alloc = rm.BASE_ALLOCATIONS["Aggressive"]
-    alloc = {k: int(v) for k, v in alloc.items()}
-    out = fc.forecast(1_000_000, 0, alloc, {"mmf": 11.85, "tbill": 15.42, "unit": 12.10}, 12)
+def test_forecast_range_is_ordered_and_narrows_with_time():
+    alloc = {"mmf": 75, "equity": 25}
+    out = fc.forecast(1_000_000, 0, alloc, 12)
     assert out["pessimisticValueCents"] < out["projectedValueCents"] < out["optimisticValueCents"]
     assert out["pessimisticAnnualReturnPct"] < out["expectedAnnualReturnPct"]
     assert out["inflationAdjustedValueCents"] < out["projectedValueCents"]
+    long = fc.forecast(1_000_000, 0, alloc, 120)
+    spread = lambda o: o["optimisticAnnualReturnPct"] - o["pessimisticAnnualReturnPct"]
+    assert spread(long) < spread(out)
+    assert spread(fc.forecast(1_000_000, 0, {"mmf": 100, "equity": 0}, 12)) < spread(out)   # less equity, less range
 
 
 def test_future_value_matches_closed_form():

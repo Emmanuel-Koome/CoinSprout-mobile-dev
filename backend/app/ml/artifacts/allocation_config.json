@@ -1,0 +1,63 @@
+{
+  "modelVersion": "ml-v1",
+  "covarianceMethod": "Ledoit-Wolf shrinkage of the correlation, sample variances kept",
+  "method": "mean-variance (Markowitz), 2 assets, closed form with bounds",
+  "assets": [
+    "MMF",
+    "Equity"
+  ],
+  "categories": {
+    "Conservative": {
+      "lam": 12.0,
+      "eq": [
+        0.0,
+        0.15
+      ]
+    },
+    "Moderate": {
+      "lam": 5.0,
+      "eq": [
+        0.1,
+        0.35
+      ]
+    },
+    "Aggressive": {
+      "lam": 1.5,
+      "eq": [
+        0.25,
+        0.6
+      ]
+    }
+  },
+  "splitStepPct": 5,
+  "guardrails": {
+    "shortHorizonEquityCap": 0.1
+  },
+  "pointSplits": {
+    "Conservative": {
+      "MMF": 100,
+      "Equity": 0,
+      "expectedReturnPct": 10.54,
+      "volatilityPct": 0.54,
+      "onEquityFloor": true,
+      "onEquityCap": false
+    },
+    "Moderate": {
+      "MMF": 90,
+      "Equity": 10,
+      "expectedReturnPct": 9.7,
+      "volatilityPct": 1.97,
+      "onEquityFloor": true,
+      "onEquityCap": false
+    },
+    "Aggressive": {
+      "MMF": 75,
+      "Equity": 25,
+      "expectedReturnPct": 8.45,
+      "volatilityPct": 4.79,
+      "onEquityFloor": true,
+      "onEquityCap": false
+    }
+  },
+  "disclaimer": "Educational use only. Not financial advice."
+}

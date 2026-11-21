@@ -7,7 +7,7 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env            # then export the variables (or use your process manager)
 uvicorn app.main:app --reload   # Swagger UI: /docs (dev only)
-pytest                          # 77 tests
+pytest                          # 86 tests
 ```
 
 ## Conventions

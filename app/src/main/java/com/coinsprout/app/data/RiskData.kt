@@ -4,7 +4,7 @@ package com.coinsprout.app.data
 object RiskData {
     val descriptions = mapOf(
         "Conservative" to "You'd rather grow slowly and steadily. We lean heavily on Money Market Funds so your savings stay safe and liquid.",
-        "Moderate" to "You're comfortable with a little movement for a little more upside. We balance safety with steady growth funds.",
-        "Aggressive" to "You're playing the long game and can ride out the dips. We tilt more of your savings into growth-focused funds."
+        "Moderate" to "You're comfortable with a little movement for a little more upside. Most stays in a Money Market Fund, with a slice in NSE equities.",
+        "Aggressive" to "You're playing the long game and can ride out the dips. A bigger share goes into NSE equities, which can grow more but also fall further."
     )
 }

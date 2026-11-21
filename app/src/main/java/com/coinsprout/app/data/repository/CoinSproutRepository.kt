@@ -65,9 +65,8 @@ class CoinSproutRepository(
     }
 
     // ---------------------------------------------------------------- onboarding / profile
-    suspend fun submitRiskProfile(horizon: Int, tolerance: Int, income: Int): ApiResult<RecommendationModel> {
-        val savings = session.portfolio.value.balanceCents
-        val result = apiCall { api.putRiskProfile(RiskProfileBody(horizon, tolerance, income, savings)) }
+    suspend fun submitRiskProfile(horizon: Int, tolerance: Int, income: Int, experience: Int): ApiResult<RecommendationModel> {
+        val result = apiCall { api.putRiskProfile(RiskProfileBody(horizon, tolerance, income, experience)) }
         return if (result is ApiResult.Ok) {
             val rec = result.value.toModel()
             session.savePortfolio(session.portfolio.value.copy(recommendation = rec))
@@ -219,6 +218,6 @@ private fun TransactionDto.toEntity() = TransactionEntity(
 )
 
 fun RecommendationDto.toModel() = RecommendationModel(
-    category, Allocation(allocation.mmf, allocation.tbill, allocation.unit, allocation.cash),
+    category, Allocation(allocation.mmf, allocation.equity),
     personalized, aiLabel, reasoning.orEmpty(), confidenceScore, expectedAnnualYieldPct
 )

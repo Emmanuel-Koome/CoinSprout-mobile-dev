@@ -54,10 +54,10 @@ class CoinSproutViewModel(app: Application) : AndroidViewModel(app) {
     private val _quiz = MutableStateFlow<Load<RecommendationModel>>(Load.Idle)
     val quiz: StateFlow<Load<RecommendationModel>> = _quiz.asStateFlow()
 
-    fun submitQuiz(horizon: Int, tolerance: Int, income: Int) {
+    fun submitQuiz(horizon: Int, tolerance: Int, income: Int, experience: Int) {
         _quiz.value = Load.Loading
         viewModelScope.launch {
-            _quiz.value = when (val r = repo.submitRiskProfile(horizon, tolerance, income)) {
+            _quiz.value = when (val r = repo.submitRiskProfile(horizon, tolerance, income, experience)) {
                 is ApiResult.Ok -> Load.Ready(r.value)
                 is ApiResult.Err -> Load.Failed(r.message)
             }

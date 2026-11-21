@@ -1,0 +1,125 @@
+{
+  "modelVersion": "ml-v1",
+  "trainedAt": "2026-11-21T20:52:07+00:00",
+  "nasiSha16": "daa7f7ec9b55eee3",
+  "classifier": {
+    "comparison": [
+      {
+        "model": "Logistic Regression",
+        "cvMacroF1": 0.803,
+        "testMacroF1": 0.803,
+        "testAccuracy": 0.81,
+        "bestParams": {
+          "clf__C": 1
+        }
+      },
+      {
+        "model": "Random Forest",
+        "cvMacroF1": 0.766,
+        "testMacroF1": 0.766,
+        "testAccuracy": 0.775,
+        "bestParams": {
+          "clf__max_depth": 8,
+          "clf__min_samples_leaf": 1,
+          "clf__n_estimators": 300
+        }
+      },
+      {
+        "model": "SVM",
+        "cvMacroF1": 0.803,
+        "testMacroF1": 0.803,
+        "testAccuracy": 0.81,
+        "bestParams": {
+          "clf__C": 10,
+          "clf__gamma": "scale",
+          "clf__kernel": "linear"
+        }
+      }
+    ],
+    "exported": "Logistic Regression",
+    "confusionMatrix": {
+      "labels": [
+        "Conservative",
+        "Moderate",
+        "Aggressive"
+      ],
+      "matrix": [
+        [
+          27,
+          5,
+          0
+        ],
+        [
+          12,
+          78,
+          15
+        ],
+        [
+          0,
+          6,
+          57
+        ]
+      ]
+    },
+    "classBalance": {
+      "Moderate": 523,
+      "Aggressive": 315,
+      "Conservative": 162
+    },
+    "nRows": 1000,
+    "dataSource": "synthetic(n=1000, noise=0.3, seed=42)"
+  },
+  "assetStats": {
+    "period": [
+      "2017-11",
+      "2024-12"
+    ],
+    "nMonths": 79,
+    "mu": [
+      0.105364,
+      0.021958
+    ],
+    "muCi95": {
+      "low": [
+        0.097372,
+        -0.100884
+      ],
+      "high": [
+        0.115092,
+        0.163467
+      ]
+    },
+    "warnings": [
+      "Equities have a LOWER expected return than the MMF over this period, so the optimiser puts every category on its equity FLOOR. NASI is price-only (no dividends); consider --dividend-yield with a cited source."
+    ]
+  },
+  "allocation": {
+    "stability": {
+      "Conservative": {
+        "equityMeanPct": 0.8,
+        "equityStdPct": 2.8,
+        "equityP5Pct": 0.0,
+        "equityP95Pct": 6.8,
+        "medianShiftPct": 0.0,
+        "p95ShiftPct": 6.8
+      },
+      "Moderate": {
+        "equityMeanPct": 11.0,
+        "equityStdPct": 4.4,
+        "equityP5Pct": 10.0,
+        "equityP95Pct": 16.3,
+        "medianShiftPct": 0.0,
+        "p95ShiftPct": 6.3
+      },
+      "Aggressive": {
+        "equityMeanPct": 27.2,
+        "equityStdPct": 8.2,
+        "equityP5Pct": 25.0,
+        "equityP95Pct": 54.2,
+        "medianShiftPct": 0.0,
+        "p95ShiftPct": 29.2
+      }
+    },
+    "closedFormVsSlsqpMaxAbsDiff": 7.632783294297951e-17
+  }
+}

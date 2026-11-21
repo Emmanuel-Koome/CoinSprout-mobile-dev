@@ -26,27 +26,35 @@ def test_goal_contribution_uses_confirmed_balance_only(client, auth):
 
 def test_rates_are_public_and_flagged_illustrative(client):
     rates = client.get("/api/v1/cbk-rates").json()
-    assert {r["key"] for r in rates} == {"mmf", "tbill", "unit"} and all(r["illustrative"] for r in rates)
-    assert client.get("/api/v1/cbk-rates/tbill").status_code == 200
+    assert {r["key"] for r in rates} == {"mmf", "equity"} and all(r["illustrative"] for r in rates)
+    assert client.get("/api/v1/cbk-rates/equity").status_code == 200
     assert client.get("/api/v1/cbk-rates/nope").status_code == 404
 
 
 def test_admin_rate_update_needs_key_and_clears_flag(client):
     body = {"annualYieldRate": 9.5, "effectiveDate": "2026-11-10", "providerName": "CBK weekly auction"}
-    assert client.put("/api/v1/admin/rates/tbill", json=body).status_code == 403
-    r = client.put("/api/v1/admin/rates/tbill", json=body, headers={"X-Admin-Key": "dev-admin-key"})
+    assert client.put("/api/v1/admin/rates/mmf", json=body).status_code == 403
+    r = client.put("/api/v1/admin/rates/mmf", json=body, headers={"X-Admin-Key": "dev-admin-key"})
     assert r.status_code == 200 and r.json()["illustrative"] is False
 
 
 def test_risk_profile_and_ai_endpoints(client, auth):
-    rec = client.put("/api/v1/me/risk-profile", json={"riskHorizon": 3, "riskTolerance": 3, "incomeStability": 3,
-                                                      "currentSavingsCents": 9_000_000}, headers=auth).json()
-    assert sum(rec["allocation"].values()) == 100 and rec["expectedAnnualYieldPct"] > 0
-    ai = client.post("/api/v1/ai/optimize-allocation", json={"riskHorizon": 1, "riskTolerance": 1, "incomeStability": 1}, headers=auth).json()
-    assert ai["recommendedCategory"] == "Conservative" and ai["modelVersion"]
+    quiz = {"timeHorizon": 5, "riskTolerance": 5, "incomeStability": 5, "investmentExperience": 5}
+    rec = client.put("/api/v1/me/risk-profile", json=quiz, headers=auth).json()
+    assert set(rec["allocation"]) == {"mmf", "equity"} and sum(rec["allocation"].values()) == 100
+    assert rec["category"] == "Aggressive" and rec["expectedAnnualYieldPct"] > 0 and rec["reasoning"]
+    assert client.get("/api/v1/me", headers=auth).json()["riskCategory"] == "Aggressive"
+
+    low = {"timeHorizon": 1, "riskTolerance": 1, "incomeStability": 1, "investmentExperience": 1}
+    ai = client.post("/api/v1/ai/optimize-allocation", json=low, headers=auth).json()
+    assert ai["recommendedCategory"] == "Conservative" and ai["modelVersion"] == "ml-v1" and ai["disclaimer"]
+    assert abs(sum(ai["categoryProbabilities"].values()) - 1) < 0.01
+
     f = client.post("/api/v1/ai/forecast-growth", json={"principalCents": 1_000_000, "monthlyContributionCents": 50000, "monthsAhead": 24}, headers=auth).json()
     assert f["pessimisticValueCents"] < f["projectedValueCents"] < f["optimisticValueCents"] and f["assumptions"]
-    assert client.post("/api/v1/ai/optimize-allocation", json={"riskHorizon": 9, "riskTolerance": 1, "incomeStability": 1}, headers=auth).status_code == 422
+    assert client.post("/api/v1/ai/optimize-allocation", json={**low, "timeHorizon": 6}, headers=auth).status_code == 422
+    assert client.post("/api/v1/ai/optimize-allocation", json={"timeHorizon": 3, "riskTolerance": 3, "incomeStability": 3},
+                       headers=auth).status_code == 422      # all four answers are required
 
 
 def test_insights(client, auth):

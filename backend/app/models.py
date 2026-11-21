@@ -24,17 +24,17 @@ class User(Base):
     phone: Mapped[str] = mapped_column(String(16), unique=True, index=True)  # canonical +2547XXXXXXXX
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
-    # Risk profile (quiz answers 1..3) and the stored recommendation
-    risk_horizon: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # Risk profile (quiz answers 1..5) and the stored recommendation (app/ml/engine.py)
+    time_horizon: Mapped[int | None] = mapped_column(Integer, nullable=True)
     risk_tolerance: Mapped[int | None] = mapped_column(Integer, nullable=True)
     income_stability: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    investment_experience: Mapped[int | None] = mapped_column(Integer, nullable=True)
     risk_category: Mapped[str | None] = mapped_column(String(16), nullable=True)
     model_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
     model_reasoning: Mapped[str | None] = mapped_column(Text, nullable=True)
-    alloc_mmf: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    alloc_tbill: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    alloc_unit: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    alloc_cash: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    model_version: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    alloc_mmf: Mapped[int | None] = mapped_column(Integer, nullable=True)      # money market fund, %
+    alloc_equity: Mapped[int | None] = mapped_column(Integer, nullable=True)   # NSE equities, %
 
 
 
@@ -142,7 +142,7 @@ class Notification(Base):
 class MarketRate(Base):
     __tablename__ = "market_rates"
     id: Mapped[str] = mapped_column(String(32), primary_key=True)   # slug e.g. "mmf"
-    key: Mapped[str] = mapped_column(String(16), unique=True)       # mmf | tbill | unit
+    key: Mapped[str] = mapped_column(String(16), unique=True)       # mmf | equity
     asset_class: Mapped[str] = mapped_column(String(64))
     annual_yield_rate: Mapped[float] = mapped_column(Float)         # percent p.a.
     effective_date: Mapped[date] = mapped_column(Date)

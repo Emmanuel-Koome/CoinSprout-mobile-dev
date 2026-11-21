@@ -1,0 +1,44 @@
+{
+  "modelVersion": "ml-v1",
+  "assets": [
+    "MMF",
+    "Equity"
+  ],
+  "period": [
+    "2017-11",
+    "2024-12"
+  ],
+  "nMonths": 79,
+  "equityDividendYieldAssumed": 0.0,
+  "mu": [
+    0.105364,
+    0.021958
+  ],
+  "cov": [
+    [
+      2.907e-05,
+      0.0
+    ],
+    [
+      0.0,
+      0.03641912
+    ]
+  ],
+  "muCi95": {
+    "low": [
+      0.097372,
+      -0.100884
+    ],
+    "high": [
+      0.115092,
+      0.163467
+    ]
+  },
+  "sources": {
+    "MMF": "huggingface:ToKnow-ai/Kenyan-Collective-Investment-Schemes-Dataset (Processed Investment Schemes Records), effective annual rates averaged across schemes",
+    "Equity": "NSE All Share Index (NASI) month-end levels, price-only, ml/data/NASI_daily_2008_2025.csv"
+  },
+  "warnings": [
+    "Equities have a LOWER expected return than the MMF over this period, so the optimiser puts every category on its equity FLOOR. NASI is price-only (no dividends); consider --dividend-yield with a cited source."
+  ]
+}

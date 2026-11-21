@@ -43,6 +43,8 @@ backend/                   FastAPI service (see backend/README.md)
   app/study/ + app/static/study.html   the no-real-money online experiment (separate from the app)
   analysis/                H1/H2/E1/E2 pipeline + power check
   backtest/                walk-forward harness for Objective 4
+  app/ml/                  runtime AI engine: trained risk classifier + MMF/NSE mean-variance allocator (JSON artifacts)
+ml/                        AI engine training (from SemProject_MLEngine): notebooks, NASI data, train.py; see ml/README.md
 docs/CRITIQUE.md           lecturer-style review of the original app
 docs/RESEARCH_ALIGNMENT.md Chapters 1-3 vs the project: gaps, chapter issues, ready-to-paste Chapter 3 text
 ```
@@ -56,7 +58,7 @@ cd backend
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000        # docs at http://localhost:8000/docs
-pytest                                           # 77 tests
+pytest                                           # 86 tests
 ```
 Dev mode returns the OTP in the API response and logs it, and uses a mock M-Pesa provider.
 
@@ -81,7 +83,7 @@ and expose the server publicly (e.g. a tunnel) so Safaricom can reach `PUBLIC_BA
 
 | | |
 |---|---|
-| Backend, study module, analysis, backtest | 77 automated tests; live server exercised end-to-end |
+| Backend, study module, analysis, backtest | 86 automated tests; live server exercised end-to-end |
 | Kotlin domain layer | 21 JUnit tests run under the Kotlin compiler |
 | Android UI / Room / Retrofit wiring | **Written but not compiled in the authoring environment** (no Android SDK). Expect to fix a few small compile errors on first sync and please report them |
 | Daraja integration | Follows Safaricom's published contract; **not run against Safaricom** |

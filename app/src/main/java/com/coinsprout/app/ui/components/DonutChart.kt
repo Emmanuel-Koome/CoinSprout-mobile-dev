@@ -23,8 +23,7 @@ import com.coinsprout.app.ui.theme.*
 private data class Slice(val label: String, val percent: Int, val color: Color)
 
 private fun slices(a: Allocation) = listOf(
-    Slice("Money Market", a.mmf, Forest), Slice("T-Bills", a.tbill, SproutDark),
-    Slice("Unit Trust", a.unit, Mustard), Slice("Cash buffer", a.cash, Moss)
+    Slice("Money Market", a.mmf, Forest), Slice("NSE Equities", a.equity, Mustard)
 )
 
 /** Colour is never the only carrier of meaning: [AllocationLegend] prints every percentage. */
